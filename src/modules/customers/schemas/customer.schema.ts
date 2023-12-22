@@ -10,9 +10,15 @@ export class Customers {
   name: string;
 
   @Prop({ required: true, unique: true })
+  dni: string;
+
+  @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
+  @Prop({ default: false })
+  isDelete: boolean;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Products' }] })
   products: Products[];
 }
 

@@ -1,26 +1,46 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
-
+import { InjectModel } from '@nestjs/mongoose';
+import { Customers, CustomersDocument } from './schemas/customer.schema';
+import { Model } from 'mongoose';
 @Injectable()
 export class CustomersService {
-  create(createCustomerDto: CreateCustomerDto) {
-    return 'This action adds a new customer';
+  constructor(
+    @InjectModel(Customers.name)
+    private customersModule: Model<CustomersDocument>,
+  ) {}
+  async create(createCustomerDto: CreateCustomerDto) {
+    return await this.customersModule.create(createCustomerDto);
   }
 
-  findAll() {
-    return `This action returns all customers`;
+  async findAll() {
+    return await this.customersModule.find({ isDelete: false });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`;
+  async findOne(id: string) {
+    return await this.customersModule.findById(id, { isDelete: false });
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+  async update(id: string, updateCustomerDto: UpdateCustomerDto) {
+    const updatedCustomer = await this.customersModule.findByIdAndUpdate(
+      id,
+      updateCustomerDto,
+      { new: true },
+    );
+    if (!updatedCustomer) {
+      throw new Error('Customer not found');
+    }
+    return updatedCustomer;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} customer`;
+  async remove(id: string) {
+    const customer = await this.customersModule.findById(id);
+    if (!customer) {
+      throw new Error('Customer not found');
+    }
+    customer.isDelete = true;
+    await this.customersModule.updateOne({ _id: id }, customer);
+    return customer;
   }
 }
