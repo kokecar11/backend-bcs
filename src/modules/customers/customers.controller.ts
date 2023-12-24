@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -13,25 +21,25 @@ export class CustomersController {
   }
 
   @Get()
-  findAll() {
-    return this.customersService.findAll();
+  findAll(@Query() queryParams: { dni: string; type: string }) {
+    return this.customersService.findCustomerByDniAndType(queryParams);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.customersService.findOne(id);
+  @Get(':productNumber')
+  findOne(@Param('productNumber') productNumber: string) {
+    return this.customersService.findOneByProductNumber(productNumber);
   }
 
-  @Patch(':id')
+  @Patch(':dni/update')
   update(
-    @Param('id') id: string,
+    @Param('dni') dni: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    return this.customersService.update(id, updateCustomerDto);
+    return this.customersService.update(dni, updateCustomerDto);
   }
 
-  @Patch(':id')
-  remove(@Param('id') id: string) {
-    return this.customersService.remove(id);
+  @Patch(':dni/remove')
+  remove(@Param('dni') dni: string) {
+    return this.customersService.remove(dni);
   }
 }

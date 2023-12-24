@@ -4,6 +4,10 @@ import { Products } from 'src/modules/products/schemas/products.schema';
 
 export type CustomersDocument = Customers & Document;
 
+export enum CustomerType {
+  personal = 'personal',
+  empresa = 'empresa',
+}
 @Schema()
 export class Customers {
   @Prop({ required: true })
@@ -11,6 +15,9 @@ export class Customers {
 
   @Prop({ required: true, unique: true })
   dni: string;
+
+  @Prop({ required: true, enum: CustomerType, default: CustomerType.personal })
+  type: CustomerType;
 
   @Prop({ required: true, unique: true })
   email: string;

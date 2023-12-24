@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -14,33 +14,45 @@ export class CustomersService {
     return await this.customersModule.create(createCustomerDto);
   }
 
-  async findAll() {
-    return await this.customersModule.find({ isDelete: false });
+  async findCustomerByDniAndType(queryParams: { dni?: string; type?: string }) {
+    const query = { isDelete: false };
+    for (const key in queryParams) {
+      query[key] = queryParams[key];
+    }
+    return await this.customersModule.findOne(query);
   }
 
-  async findOne(id: string) {
-    return await this.customersModule.findById(id, { isDelete: false });
+  async findOneByProductNumber(productNumber: string) {
+    return await this.customersModule.aggregate([
+      { $match: { 'products.productNumber': productNumber, isDelete: false } },
+      { $unwind: '$products' },
+      { $match: { 'products.productNumber': productNumber } },
+      { $project: { products: 1, dni: 1, name: 1, _id: 0 } },
+    ]);
   }
 
-  async update(id: string, updateCustomerDto: UpdateCustomerDto) {
-    const updatedCustomer = await this.customersModule.findByIdAndUpdate(
-      id,
+  async update(dni: string, updateCustomerDto: UpdateCustomerDto) {
+    const updatedCustomer = await this.customersModule.findOneAndUpdate(
+      { dni, isDelete: false },
       updateCustomerDto,
       { new: true },
     );
     if (!updatedCustomer) {
-      throw new Error('Customer not found');
+      throw new NotFoundException('Customer not found');
     }
     return updatedCustomer;
   }
 
-  async remove(id: string) {
-    const customer = await this.customersModule.findById(id);
+  async remove(dni: string) {
+    const customer = await this.customersModule.findOne({
+      dni,
+      isDelete: false,
+    });
     if (!customer) {
-      throw new Error('Customer not found');
+      throw new NotFoundException('Customer not found');
     }
     customer.isDelete = true;
-    await this.customersModule.updateOne({ _id: id }, customer);
-    return customer;
+    await this.customersModule.updateOne({ dni }, customer);
+    return { message: 'Customer deleted' };
   }
 }
