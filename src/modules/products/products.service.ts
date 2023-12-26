@@ -30,7 +30,8 @@ export class ProductsService {
     newProduct.save();
     const customer = await this.customersModule.findOne({ dni: customerDni });
     customer.products.push(newProduct);
-    return await this.customersModule.updateOne({ dni: customerDni }, customer);
+    await this.customersModule.updateOne({ dni: customerDni }, customer);
+    return newProduct;
   }
 
   async update(productNumber: string, updateProductDto: UpdateProductDto) {
