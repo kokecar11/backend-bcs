@@ -24,11 +24,11 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
-  @Post()
-  @UseGuards(AuthGuard('jwt'))
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
-  }
+  // @Post()
+  // @UseGuards(AuthGuard('jwt'))
+  // create(@Body() createProductDto: CreateProductDto) {
+  //   return this.productsService.create(createProductDto);
+  // }
 
   @Post(':customerDni/create')
   @UseGuards(AuthGuard('jwt'))
